@@ -69,9 +69,10 @@ router.delete('/:id', logger, validateUserId, async (req, res, next) => {
   }
 });
 
-router.get('/:id/posts', logger, validateUserId, validatePost, async (req, res, next) => {
+router.get('/:id/posts', logger, validateUserId, async (req, res, next) => {
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
+  console.log("hello")
   try {
     const result = await Users.getUserPosts(req.params.id)
     res.json(result)
