@@ -69,25 +69,29 @@ router.delete('/:id', logger, validateUserId, async (req, res, next) => {
   }
 });
 
-router.get('/:id/posts', logger, validateUserId, (req, res, next) => {
+router.get('/:id/posts', logger, validateUserId, validatePost, async (req, res, next) => {
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
-  Posts.getById(req.params.id)
-  .then(user => {
-    res.status(200).json(user)
-  })
-  .catch(next)
+  try {
+    const result = await Users.getUserPosts(req.params.id)
+    res.json(result)
+  } catch (err) {
+    next(err)
+  }
 });
 
-router.post('/:id/posts', logger, validateUserId, (req, res, next) => {
+
+router.post('/:id/posts', logger, validateUserId, validatePost, async (req, res, next) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
-  Posts.insert(req.body)
-  .then(user => {
-    res.status(200).json(user)
-  })
-  .catch(next)
+  try {
+    const result = await Posts.insert({user_id: req.params.id, text: req.text})
+    res.status(201).json(result)
+  }
+  catch (err) {
+    next(err)
+  }
 });
 
 // do not forget to export the router
