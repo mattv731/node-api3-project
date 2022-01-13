@@ -1,41 +1,61 @@
 const Users = require('./../users/users-model')
 
-async function logger(req, res, next) {
+function logger(req, res, next) {
   // DO YOUR MAGIC
-  await 
-  console.log("logger req.method:", req.method)
-  console.log("logger req.url:", req.url)
-  console.log("logger req.timestamp:", Date.now())
+  const timestamp = new Date().toLocaleString()
+  const method = req.method
+  const url = req.originalUrl
+  console.log(`[${timestamp}] ${method} to ${url}`)
   next()
 }
 
 async function validateUserId(req, res, next) {
   // DO YOUR MAGIC 
-  const { id } = await req.params
   try {
-    Users.getById(id)
-    if(id) {next()}
-    else {next({ status: 404, message: "user not found" })}
+    const user = await Users.getById(req.params.id)
+    if(!user) {
+      res.status(404).json({
+        message: "user not found"
+      })
+    } else {
+      req.user = user
+      next()
+    }
+  } catch (err) {
+    res.status(500).json({message: "user not found"})
   }
-  catch {next}
 }
 
 async function validateUser(req, res, next) {
   // DO YOUR MAGIC
-  const { name } = await req.body
-  next()
-  // try {
-  //   Users.insert(req.body)
-  //   if(name){next(req.body)}
-  //   else{next({ status: 400, message: "missing required name field" })}
-  // }
-  // catch {next}
+  try {
+    const userBody = await req.body.name
+    if(!userBody) {
+      res.status(400).json({
+        message: "missing required name field"
+      })
+    } else {
+      next()
+    }
+  } catch (err) {
+    res.status(500).json({message: "invalid"})
+  }
   }
 
-function validatePost(req, res, next) {
+async function validatePost(req, res, next) {
   // DO YOUR MAGIC
-  console.log("validatePost req:", req)
-  next()
+  try {
+    const postText = await req.body.postText
+    if(!postText) {
+      res.status(400).json({
+        message: "missing required text field"
+      })
+    } else {
+      next()
+    }
+  } catch (err) {
+    res.status(500).json({message: "invalid"})
+}
 }
 
 // do not forget to expose these functions to other modules
